@@ -11,6 +11,8 @@ require('dotenv').config();
 
 const app = express();
 
+console.log('Process env', process.env.MONGO_URI);
+
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());

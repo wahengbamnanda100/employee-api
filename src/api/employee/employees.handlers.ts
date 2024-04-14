@@ -1,8 +1,9 @@
 import { Response, Request, NextFunction } from 'express';
-import { Employee, EmployeeWithId, Employees } from './employees.model';
-import { ZodError } from 'zod';
-import { ParamsWithId } from '../../interfaces/ParamWithId';
 import { ObjectId } from 'mongodb';
+
+import { sendCRUDResponse } from '../../config/apiResponse';
+import { ParamsWithId } from '../../interfaces/ParamWithId';
+import { Employee, EmployeeWithId, Employees } from './employees.model';
 
 export async function findAll(
   req: Request,
@@ -27,14 +28,18 @@ export async function createOne(
     const inserResult = await Employees.insertOne(req.body);
     if (!inserResult.acknowledged) throw new Error('Error inserting employee');
     res.status(200);
-    res.json({
-      _id: inserResult.insertedId,
-      ...req.body,
-    });
+
+    sendCRUDResponse<EmployeeWithId>(
+      res,
+      true,
+      {
+        _id: inserResult.insertedId,
+        ...req.body,
+      },
+      'Employee created',
+      'success',
+    );
   } catch (err) {
-    if (err instanceof ZodError) {
-      res.status(422);
-    }
     next(err);
   }
 }
